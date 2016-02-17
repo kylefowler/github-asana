@@ -3,28 +3,28 @@
  */
 
 var express = require('express')
-  , github_asana = require('./lib/github-asana');
+  , github_asana = require('./lib/github-asana')
+  , bodyParser = require('body-parser');
 
-var app = module.exports = express.createServer();
+var app = module.exports = express();
+
+function error(err, req, res, next) {
+  // log it
+  console.error(err.stack);
+
+  // respond with 500 "Internal Server Error".
+  res.status(500);
+  res.send('Internal Server Error');
+}
 
 // Configuration
-
-app.configure(function(){
-  app.use(express.bodyParser());
-  app.use(express.methodOverride());
-  app.use(app.router);
-});
-
-app.configure('development', function(){
-  app.use(express.errorHandler({ dumpExceptions: true, showStack: true }));
-});
-
-app.configure('production', function(){
-  app.use(express.errorHandler());
-});
+app.use(bodyParser.urlencoded());
+app.use(bodyParser.json())
+//app.use(express.methodOverride());
+//app.use(app.router());
+app.use(error);
 
 // Routes
-
 app.post('/', github_asana.index);
 
 var port = process.env.PORT || 3000;
